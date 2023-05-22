@@ -527,9 +527,9 @@ for(i in seq_along(colnames(clonotype.data))){
 # Get data of how many cells in each cluster are assigned to what clonotypes
 clonotype.data <- table(CD8.seurat.tcr@meta.data$CTaa, CD8.seurat.tcr@meta.data$Clusters_l1)
 
-colnames(clonotype.data)[5]
+colnames(clonotype.data)[4]
 
-ISG.clones <- clonotype.data[,5]
+ISG.clones <- clonotype.data[,4]
 ISG.clones <- sort(ISG.clones, decreasing = T)
 names(ISG.clones[1:20])
 x <- ISG.clones[ISG.clones>5]
