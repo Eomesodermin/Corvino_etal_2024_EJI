@@ -105,7 +105,11 @@ if(!dir.exists(paste0(output.dir))){
 
 
 
+<<<<<<< Updated upstream
 ## Type I IFN {.tabset}
+=======
+## Type I IFN score HNSCC dataset {.tabset}
+>>>>>>> Stashed changes
 
 ### Reading data
 ```{r reading_data}
@@ -165,7 +169,7 @@ if(long.compute){
 #Sig.10 <- IFN.clust.DEGs %>%
 #  filter(p_val_adj <= 0.05) %>%
 #  top_n(10, avg_log2FC) %>%
-#  pull(gene_symbol)
+#  pull(gene_symbol) 
 
 
 # Hard code the signature to prevent any alternations with statistical drift 
@@ -377,9 +381,6 @@ for(i in seq_len(length(upregulated.plots))){
          device = "pdf")
   
 }
-
-
-
 
 
 
