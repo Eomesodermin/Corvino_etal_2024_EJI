@@ -1,5 +1,5 @@
 ---
-title: "05_Manuscript_Figure_4"
+title: "05_Figure_4"
 author: "Dillon Corvino"
 date: "07/03/2022"
 output:
@@ -20,27 +20,6 @@ editor_options:
 Built with R version `{r} getRversion()`
 
 ## Setup {.tabset}
-
-### Dataset information
-
-```{r Dataset_Info}
-
-# HNSCC scRNAseq/scTCRseq dataset
-# Cells are HNSCC TILs sorted on Lymphocytes/Live/CD3+/CD4-/CD8+
-# Human samples
-# Each sample is a pool of 4 patients
-# samples 1 and 2 are unstimulated 
-# samples 3 and 4 are stimulated 
-# Patients in sample 1 match patients in sample 3 and sample 2 pairs with 4
-# Data acquired was transcript expression, ADT (antibody expression), and TCRA & B sequences
-# This analysis uses just Transcript and TCR data
-
-
-# General information
-# CellRanger was used for sequence alignment/QC/counts/TCR calls - performed by Ross (QIMR, Brisbane, Aus)
-# DC was provided the output from CellRanger (counts matrix) and used this as input for analysis within this script
-
-```
 
 ### Environment
 
@@ -84,10 +63,9 @@ require(clusterProfiler)
 require(enrichplot)
 require(UCell)
 
-#source("scripts/aimed_analysis/functions.R")
 
 # Create output directory
-output.dir <- "results/Manuscript/Figure4/"
+output.dir <- "results/Figure_4/"
 
 if(!dir.exists(paste0(output.dir))){
   dir.create(paste0(output.dir), 
@@ -120,7 +98,7 @@ if(long.compute){
   
   # Calculate DEGs
   IFN.clust.DEGs <- FindMarkers(CD8.seurat,
-                                ident.1 = "Type_I_IFN",
+                                ident.1 = "ISG",
                                 logfc.threshold = 0,
                                 min.pct = 0)
   # Annotate DEGs
@@ -135,18 +113,6 @@ if(long.compute){
   # Export results
   write_csv(x = IFN.clust.DEGs,
             file = paste0(output.dir, "IFN_clust_DEGs.csv"))
-  
-  
-  # Define signature as top DEGs only
-  IFN.sig <- IFN.clust.DEGs %>%
-    filter(p_val_adj <= 0.05) %>%
-    top_n(20, avg_log2FC)
-  
-  
-  # Export results
-  write_csv(x = IFN.sig,
-            file = paste0(output.dir, "IFN_signature.csv"))
-  
   
 }
 
@@ -176,7 +142,7 @@ signature.names <- paste0(names(Signature.list), "_UCell")
 
 
   # read in data
-input.dir <- "results/Manuscript/Figure4/"
+input.dir <- "results/Figure_4/"
 
 IFN.clust.DEGs <- read.csv(paste0(input.dir, "IFN_clust_DEGs.csv"))
 
@@ -227,42 +193,71 @@ dev.off()
 
 ```
 
+
 ### Figure 4C
 ```{r Figure_4C}
 
-# install required packages
-#BiocManager::install("decoupleR") 
-#BiocManager::install("OmnipathR") 
-#BiocManager::install("ComplexHeatmap")
 
-library("decoupleR")
-
-# Retrieve prior knowledge network.
-network <- decoupleR::get_progeny(organism = "human")
+# Prepare dataset for heatmap
+Idents(CD8.seurat) <- CD8.seurat@meta.data$Clusters_l1
+DefaultAssay(CD8.seurat) <- "RNA"
 
 
-# Run weighted means algorithm.
-activities <- decoupleR::run_wmean(mat = as.matrix(CD8.seurat@assays$RNA@data),
-                                   network = network,
-                                   .source = "source",
-                                   .targe = "target",
-                                   .mor = "weight",
-                                   times = 100,
-                                   minsize = 5)
+# signature from Azizi et al 2018, Single-cell map of diverse immune phenotypes in breast tumor microenvironment (https://doi.org/10.1016/j.cell.2018.05.060)
+
+# note signature published in manuscript has FAM46C, this is also called TENT5C in newest HGNC symbol annotation - signature has been adjusted to reflect this
+Type1.signature <- c("IRF1", "IFIH1", "IFITM3", "DDX58", "IFI44L", "IFI6", "IFITM2", "NAMPT", "OASL",
+                     "RTP4", "TREX1", "ADAR", "TENT5C", "LY6E", "MCOLN2", "APOBEC3G", "IL15", "ISG15", "MX1", "TLR3")
+
+# Manuscript signature is published with C-MYC, P21, PD-L1, these have been adjusted to human HNGC symbols, MYC, CDKN1A, and CD274 respectively
+# Additionally, signature simply stated MHC1 and MHC2, these are collected using  grex expression "HLA.*"
+Type2.signature <- c("IFNG", "CXCL9", "CXCL10", "STAT1", "CD274", "CDKN1A", "MYC", "SMAD7", "IRF1")
+HLA.genes <- grep("^HLA.*", rownames(CD8.seurat), value = T)
+Type2.signature <- c(Type2.signature, HLA.genes)
 
 
-# General heatmap.
-out <- SCpubr::do_PathwayActivityPlot(sample = CD8.seurat,
-                                      cluster_rows = FALSE,
-                                      activities = activities)
-p <- out$heatmaps$average_scores
-p
-dev.copy(pdf, paste0(output.dir, "Figure_4C.pdf"))
+Signature.list <- list(Type1.sig = Type1.signature, 
+                       Type2.sig = Type2.signature)
+
+
+if(long.compute){
+
+ cores <- parallel::detectCores(all.tests = FALSE, logical = TRUE)
+
+# Calculate Ucell scores for signatures
+ CD8.seurat <- UCell::AddModuleScore_UCell(CD8.seurat,
+                                           features = Signature.list,
+                                           ncores = cores)
+
+
+}
+
+########################
+# plot signature scores 
+########################
+
+# Type 1 Signature
+VlnPlot(CD8.seurat, 
+        features = "Type1.sig_UCell",
+        cols = CD8.cols,
+        pt.size = 0) + 
+  NoLegend()
+
+dev.copy(pdf, paste0(output.dir, "Figure_4C_Type1_signature.pdf"))
+dev.off()
+
+
+# Type 2 Signature
+VlnPlot(CD8.seurat, 
+        features = "Type2.sig_UCell",
+        cols = CD8.cols,
+        pt.size = 0) + 
+  NoLegend()
+
+dev.copy(pdf, paste0(output.dir, "Figure_4C_Type2_signature.pdf"))
 dev.off()
 
 ```
-
-
 
 ### Figure 4D
 ```{r Figure_4D}
@@ -342,32 +337,25 @@ downregulated.plots <- SCpubr::do_TermEnrichmentPlot(enriched_terms = dn.enriche
                                                    colors.use = c("royalblue", "gray"),
                                                    nterms = 10)
 
-# Plot and save all plots generated 
-for(i in seq_len(length(upregulated.plots))){
-  
-  
-  # upregulated plots
-  name.var <- names(upregulated.plots)[i]
-  
-  ggsave(filename = paste0(output.dir, "Upregulated_",  name.var, ".pdf"),
-         plot = upregulated.plots[[i]], 
-         width = 20, 
-         height = 20, 
-         units = "in",
-         device = "pdf")
-  
-  # downregulated plots
-  name.var <- names(downregulated.plots)[i]
-  
-  ggsave(filename = paste0(output.dir, "Downregulated_",  name.var, ".pdf"),
-         plot = downregulated.plots[[i]], 
-         width = 20, 
-         height = 20, 
-         units = "in",
-         device = "pdf")
-  
-}
+# upregulated plot
+name.var <- dbs_use
 
+ggsave(filename = paste0(output.dir, "Figure_4D_Upregulated_",  name.var, ".pdf"),
+       plot = upregulated.plots, 
+       width = 20, 
+       height = 20, 
+       units = "in",
+       device = "pdf")
+
+# downregulated plots
+name.var <- dbs_use
+
+ggsave(filename = paste0(output.dir, "Figure_4D_Downregulated_",  name.var, ".pdf"),
+       plot = downregulated.plots, 
+       width = 20, 
+       height = 20, 
+       units = "in",
+       device = "pdf")
 
 
 ```
@@ -375,120 +363,8 @@ for(i in seq_len(length(upregulated.plots))){
 
 
 
-### Figure 4E
-```{r Figure_4E}
-
-
-# Prepare dataset for heatmap
-Idents(CD8.seurat) <- CD8.seurat@meta.data$Clusters_l1
-DefaultAssay(CD8.seurat) <- "RNA"
-
-
-# signature from Azizi et al 2018, Single-cell map of diverse immune phenotypes in breast tumor microenvironment (https://doi.org/10.1016/j.cell.2018.05.060)
-
-# note signature published in manuscript has FAM46C, this is also called TENT5C in newest HGNC symbol annotation - signature has been adjusted to reflect this
-Type1.signature <- c("IRF1", "IFIH1", "IFITM3", "DDX58", "IFI44L", "IFI6", "IFITM2", "NAMPT", "OASL",
-                     "RTP4", "TREX1", "ADAR", "TENT5C", "LY6E", "MCOLN2", "APOBEC3G", "IL15", "ISG15", "MX1", "TLR3")
-
-# Manuscript signature is published with C-MYC, P21, PD-L1, these have been adjusted to human HNGC symbols, MYC, CDKN1A, and CD274 respectively
-# Additionally, signature simply stated MHC1 and MHC2, these are collected using  grex expression "HLA.*"
-Type2.signature <- c("IFNG", "CXCL9", "CXCL10", "STAT1", "CD274", "CDKN1A", "MYC", "SMAD7", "IRF1")
-HLA.genes <- grep("^HLA.*", rownames(CD8.seurat), value = T)
-Type2.signature <- c(Type2.signature, HLA.genes)
-
-
-Signature.list <- list(Type1.sig = Type1.signature, 
-                       Type2.sig = Type2.signature)
-
-
-if(long.compute){
-
- cores <- parallel::detectCores(all.tests = FALSE, logical = TRUE)
-
-# Calculate Ucell scores for signatures
- CD8.seurat <- UCell::AddModuleScore_UCell(CD8.seurat,
-                                           features = Signature.list,
-                                           ncores = cores)
-
-
-}
-
-########################
-# plot signature scores 
-########################
-
-# Type 1 Signature
-VlnPlot(CD8.seurat, 
-        features = "Type1.sig_UCell",
-        cols = CD8.cols,
-        pt.size = 0) + 
-  NoLegend()
-
-dev.copy(pdf, paste0(output.dir, "Figure_4E_Type1_signature.pdf"))
-dev.off()
-
-
-# Type 2 Signature
-VlnPlot(CD8.seurat, 
-        features = "Type2.sig_UCell",
-        cols = CD8.cols,
-        pt.size = 0) + 
-  NoLegend()
-
-dev.copy(pdf, paste0(output.dir, "Figure_4E_Type2_signature.pdf"))
-dev.off()
-
-```
 
 
 
-
-
-
-### TEMP
-```{r temp}
-
-
-
-# Create output directory
-output.dir <- "results/Manuscript/temp/"
-
-if(!dir.exists(paste0(output.dir))){
-  dir.create(paste0(output.dir), 
-             recursive = TRUE)
-}
-
-
-
-
-exhaustion.sig <- c("CD96", "PDCD1", "LAG3", "HAVCR2", "TIGIT", "CTLA4", "CD244", "CD160", "TOX", "TCF7", "ENTPD1", "ITGAE", "TNFRSF9", "TNFRSF18")
-# TNFRSF9 = CD137 = 4-1BB
-#TNFRSF18 = GITR
-effector.sig <- c("GZMA", "GZMB", "NKG7", "PRF1", "IFNG", "XCL1", "SP140")
-
-# SP140
-
-
-DoHeatmap(temp.seurat, 
-          features = exhaustion.sig)
-
-
-
-Idents(CD8.seurat) <- CD8.seurat@meta.data$Clusters_l1
-average.seurat <- AverageExpression(CD8.seurat, 
-                                    return.seurat = T)
-
-
-exhaustion.sig <- c("CD96", "PDCD1", "LAG3", "HAVCR2", "TIGIT", "CTLA4", "CD244", "CD160", "TOX", "TCF7", "ENTPD1", "ITGAE", "TNFRSF9", "TNFRSF18", "BTLA", "IL10", "IL27")
-effector.sig <- c("GZMA", "GZMB", "NKG7", "PRF1", "IFNG", "XCL1", "SP140")
-
-DoHeatmap(average.seurat, 
-          features = effector.sig, 
-          draw.lines = F)
-
-VlnPlot(CD8.seurat, feature = "LAG3", pt.size = 0)
-
-
-```
 
 

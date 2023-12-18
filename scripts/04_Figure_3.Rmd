@@ -1,5 +1,5 @@
 ---
-title: "07_Manuscript_Figure_6"
+title: "04_Figure_3"
 author: "Dillon Corvino"
 date: "07/03/2022"
 output:
@@ -62,7 +62,7 @@ require(Seurat)
 
 
 # Create output directory
-output.dir <- "results/Manuscript/Figure_6/"
+output.dir <- "results/Figure_3/"
 
 if(!dir.exists(paste0(output.dir))){
   dir.create(paste0(output.dir), 
@@ -89,10 +89,6 @@ if(quick.load){
 ```
 
 
-# TO DO
-# perform trajectory and output results for traj on full dataset
-# deg, heatmap etc, these three datasets. 
-# vis memory, helper, cyto, functions of ISG cluster
 
 ### Preparing dataset
 ```{r reducing_seurat_object}
@@ -141,11 +137,12 @@ if(long.compute){
   # extract vector of cells to keep
   cells.keep <- colnames(reduced.seurat.tcr)
   
-  # extract TCR dimensions from reduced seurat object
+  # extract UMAP dimensions from reduced seurat object
   temp.seurat <- subset(reduced.seurat, cells = cells.keep)
   
   DefaultAssay(reduced.seurat.tcr) <- "integrated"
-  reduced.seurat.tcr[["umap"]] <- Seurat::CreateDimReducObject(embeddings = temp.seurat@reductions$umap@cell.embeddings, key = "UMAP_", assay = DefaultAssay(reduced.seurat.tcr))
+
+  reduced.seurat.tcr[["umap"]] <- Seurat::CreateDimReducObject(embeddings = temp.seurat@reductions$umap@cell.embeddings, key = "umap_", assay = DefaultAssay(temp.seurat))
   
   
   UMAPPlot(reduced.seurat.tcr,
@@ -165,6 +162,11 @@ if(long.compute){
   rm(temp.seurat, CD8.seurat, CD8.seurat.tcr)
 }
 
+
+
+
+
+
 ```
 
 
@@ -172,6 +174,7 @@ if(long.compute){
 
 ### Figure 6A
 ```{r Figure_6A}
+
 
 # UMAP projection of reduced subset 
 
@@ -194,7 +197,7 @@ dev.off()
 ```{r Figure_6B_D}
 
 ####################################################################################
-# Identify clones that are uniquely found only in US ISG cluster
+# Identify clones that are uniquely found only in US-ISG cluster
 ####################################################################################
 
 # Clone size minimum 
@@ -649,6 +652,9 @@ if(long.compute){
 # Read data
 slingshot <- readRDS(paste0(save.dir, "slingshot.rds"))
 scorpius <- readRDS(paste0(save.dir, "scorpius.rds"))
+
+# umap dim values 
+UMAP.dims <- reduced.seurat@reductions$umap@cell.embeddings
 
 # Set root milestone for slingshot model
 slingshot <- add_root(trajectory = slingshot, 

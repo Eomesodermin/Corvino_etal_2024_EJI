@@ -1,5 +1,5 @@
 ---
-title: "06_Manuscript_Figure_5"
+title: "06_Figure_5"
 author: "Dillon Corvino"
 date: "07/03/2022"
 output:
@@ -67,7 +67,7 @@ library(harmony)
 
 
 # Create output directory
-output.dir <- "results/Manuscript/Figure_5/"
+output.dir <- "results/Figure_5/"
 
 if(!dir.exists(paste0(output.dir))){
   dir.create(paste0(output.dir), 
@@ -286,7 +286,6 @@ UMAPPlot(pancancer.cd8,
          group.by = "seurat_clusters")
 
 
-
 ```
 
 ### apply ucell score to pancancer
@@ -435,7 +434,7 @@ if(long.compute){
 ##################################################
 
 # output.dir
-output.dir <- "results/Manuscript/Figure_5/"
+output.dir <- "results/Figure_5/"
 
 if(!dir.exists(paste0(output.dir))){
   dir.create(paste0(output.dir), 
@@ -973,7 +972,7 @@ if(long.compute){
                             parallelize = TRUE, 
                             workers = cores)
   
-  saveRDS(liana_cillo, file = paste0(output.dir, "liana_cillo.rds"))
+  saveRDS(liana_cillo, file = paste0("saves/liana_cillo.rds"))
   
   
 }
@@ -982,7 +981,7 @@ if(long.compute){
 # load computed data
 #############################################
 
-liana_cillo <- readRDS(paste0(output.dir, "liana_cillo.rds"))
+liana_cillo <- readRDS(paste0("saves/", "liana_cillo.rds"))
 
 # Liana returns a list of results, each element of which corresponds to a method
 liana_cillo %>% dplyr::glimpse()
@@ -1040,7 +1039,7 @@ dev.off()
 ```{r Supplementary_Figure_3_setup}
 
 # Create output directory
-output.dir <- "results/Manuscript/Supplementary_Figure_3/"
+output.dir <- "results//Supplementary_Figure_3/"
 
 if(!dir.exists(paste0(output.dir))){
   dir.create(paste0(output.dir), 
@@ -1133,10 +1132,15 @@ if(long.compute){
   
 }
 
+# drop breast cancer 
+Idents(ISG.tumors.seurat) <- ISG.tumors.seurat@meta.data$Tissue
+ISG.tumors.seurat <- subset(ISG.tumors.seurat, idents = c("Esophagus", "Ovarian"))
 
 ##################################################################################################
 # Vln plot of Ucell scores for T1 and T2 IFN calculated on original dataset by Nick Borcherding
 ##################################################################################################
+
+
 
 VlnPlot(ISG.tumors.seurat,
         feature = "T1_Interferon_UCell",
@@ -1144,7 +1148,7 @@ VlnPlot(ISG.tumors.seurat,
         split.by = "Tissue",
         group.by = "IFN_status")
 
-dev.copy(pdf, paste0(output.dir, "Supplementary_Figure_3A_T1_Ucell.pdf"))
+dev.copy(pdf, paste0(output.dir, "Supplementary_Figure_3A_T1.pdf"))
 dev.off()
 
 VlnPlot(ISG.tumors.seurat,
@@ -1153,7 +1157,7 @@ VlnPlot(ISG.tumors.seurat,
         split.by = "Tissue",
         group.by = "IFN_status")
 
-dev.copy(pdf, paste0(output.dir, "Supplementary_Figure_3A_T2_Ucell.pdf"))
+dev.copy(pdf, paste0(output.dir, "Supplementary_Figure_3A_T2.pdf"))
 dev.off()
 
 ```
@@ -1298,7 +1302,7 @@ if(long.compute){
   SaveH5Seurat(cd8.covid.seurat,
                file = "data/external_datasets/COMBAT_COVID_CD8.h5Seurat")
   
-}else if(quick.load){
+}else{
   cd8.covid.seurat <- LoadH5Seurat("data/external_datasets/COMBAT_COVID_CD8.h5Seurat")
 }
 

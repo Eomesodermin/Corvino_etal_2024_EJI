@@ -1,5 +1,5 @@
 ---
-title: "02_Manuscript_Figure_1"
+title: "02_Figure_1"
 author: "Dillon Corvino"
 date: "07/03/2022"
 output:
@@ -83,7 +83,7 @@ DefaultAssay(seurat.combined) <- "RNA"
 
 # Create output directory
 
-output.dir <- "results/Manuscript/Figure1/"
+output.dir <- "results/Figure_1/"
 
 if(!dir.exists(paste0(output.dir))){
   dir.create(paste0(output.dir), 
@@ -91,7 +91,7 @@ if(!dir.exists(paste0(output.dir))){
 }
 
 
-output.Supfig1 <- "results/Manuscript/Sup_Figure1/"
+output.Supfig1 <- "results/Supplementary_Figure_1/"
 
 if(!dir.exists(paste0(output.Supfig1))){
   dir.create(paste0(output.Supfig1), 
