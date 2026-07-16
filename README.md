@@ -44,5 +44,5 @@ Tobias Bald, Institute for Experimental Oncology, University Hospital Bonn, Venu
 
 ## Code Attribution  
 
-This code and analysis were authored by **Dillon Corvino**.  
+This code and analysis were authored by **Dillon Corvino** — [github.com/Eomesodermin](https://github.com/Eomesodermin) · [dilloncorvino.com](https://dilloncorvino.com).  
 
