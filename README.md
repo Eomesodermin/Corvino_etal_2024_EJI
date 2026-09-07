@@ -42,6 +42,14 @@ Tobias Bald, Institute for Experimental Oncology, University Hospital Bonn, Venu
 
 ---
 
+## Data Availability
+
+The data that support the findings of this study are available on request from the corresponding author. The data are not publicly available due to privacy or ethical restrictions.
+
+External, publicly available datasets used for cross-validation in this study (uTILity pan-cancer dataset, Cillo et al. HNSCC dataset, COMBAT COVID-19 dataset) are cited in the Methods section of the associated publication and are not redistributed in this repository. This repository contains analysis code (`scripts/`), published figures and summary statistics (`results/`), and small public reference files used as analysis inputs (`data/`).
+
+---
+
 ## Code Attribution  
 
 This code and analysis were authored by **Dillon Corvino** — [github.com/Eomesodermin](https://github.com/Eomesodermin) · [dilloncorvino.com](https://dilloncorvino.com).  

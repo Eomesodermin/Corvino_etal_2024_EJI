@@ -1,5 +1,5 @@
 ---
-title: "HNSCC_Dataset_Preprocessing"
+title: "01_HNSCC_Dataset_Preprocessing"
 author: "Dillon Corvino"
 date: "03/02/2020"
 output:
@@ -22,7 +22,6 @@ Built with R version `{r} getRversion()`
 ## Setup {.tabset}
 
 ########################################################################################################################
-# DO NOT RUN THIS SCRIPT UNLESS ABSOLUTELY NECESSARY 
 # Because of random initialisation with UMAP etc. the generated plots will look different to those output as figures 
 # Please read in seurat_combined.RDS and use this for all analysis
 # Please only run scripts 02_.* onwards 
@@ -668,45 +667,6 @@ sig.genes <- Clust.13.Markers[Clust.13.Markers$p_val_adj < 0.1, ]
 
 ```
 
-### Use Clustifyr to call cluster identities
-
-**Note: What is up with the mouse.ref here?**
-
-```{r Clustifyr_cell_ID}
-
-output.dir <- "results/scRNAseq/figures/Cell_type_annotation/Clustifyr/"
-
-# Create output directory
-if(!dir.exists(paste0(output.dir))){
-  dir.create(paste0(output.dir), 
-             recursive = T)
-}
-
-
-mouse.ref <- cbmc_ref
-rownames(mouse.ref) <- stringr::str_to_title(rownames(mouse.ref))
-
-
-res <- clustifyr::clustify(input = seurat.combined,
-                           cluster_col = "seurat_clusters",
-                           ref_mat = cbmc_ref,
-                           seurat_out = FALSE,
-                           query_genes = seurat.combined@assays$integrated@var.features)
-
-
-res2 <- clustifyr::cor_to_call(cor_mat = res,                  # matrix correlation coefficients
-                               cluster_col = "seurat_clusters") # name of column in meta.data containing cell clusters
-
-
-
-print(clustifyr::plot_cor_heatmap(cor_mat = res))
-
-dev.copy(pdf, paste0(output.dir, "Heatmap_cluster_annotations.pdf"))
-dev.off()
-
-# Remove unneeded data
-rm(mouse.ref, res, res2)
-```
 
 ### Use various SingleR databases to call cluster identities
 
@@ -1004,12 +964,12 @@ Idents(seurat.combined) <- seurat.combined@meta.data$seurat_clusters
 
 # Rename classes.
 seurat.combined <- RenameIdents(object = seurat.combined,
-                                `0` = "Cytotoxic",
+                                `0` = "GZMK",
                                 `1` = "Naive_like_3",
                                 `2` = "Exhausted_1", 
-                                `3` = "Type_I_IFN",
-                                `4` = "Naive_like_1_CM", # Central memory?
-                                `5` = "Naive_like_2_SC", # Stem-cell-like
+                                `3` = "ISG",
+                                `4` = "Naive_like_1", # Central memory?
+                                `5` = "Naive_like_2", # Stem-cell-like
                                 `6` = "Stimulated_1", # Derived from cytotoxic ?
                                 `7` = "Stimulated_exhausted",
                                 `8` = "gd_T_non_g9d2", 
@@ -1020,40 +980,15 @@ seurat.combined <- RenameIdents(object = seurat.combined,
                                 `13` = "Proliferative")
 
 
-# Relevel idents variable to group clusters into order of future modules 
-
-# Module: Naive / Stem-like 
-# Naïve_like_1_CM
-# Naïve_like_2_SC
-# Naïve_like_3
-
-# Module: Activated
-# Cytotoxic
-# Type_I_IFN
-# Stimulated_1
-
-# Module: Exhaustion
-# Stimulated_exhausted
-# Exhausted_1, 
-# Exhausted_2
-# TRM
-
-# Module: Innate
-# gd_T_g9d2
-# gd_T_non_g9d2 
-# MAIT 
-
-# Module: Cycling
-# Proliferative
 
 
 # reset levels of factor variable 
 seurat.combined@active.ident <- factor(seurat.combined@active.ident, 
-                                       levels = c("Naive_like_1_CM",
-                                                  "Naive_like_2_SC", 
+                                       levels = c("Naive_like_1",
+                                                  "Naive_like_2", 
                                                   "Naive_like_3", 
-                                                  "Cytotoxic",
-                                                  "Type_I_IFN",
+                                                  "GZMK",
+                                                  "ISG",
                                                   "Stimulated_1",
                                                   "Stimulated_exhausted",
                                                   "Exhausted_1",
@@ -1485,8 +1420,8 @@ if(long.compute){
   # Keep only innate clusters
   unique(Idents(seurat.combined))
   
-  CD8.seurat <- subset(seurat.combined, idents = c("Naive_like_1_CM", "Naive_like_2_SC", "Naive_like_3", 
-                                                   "Cytotoxic", "Type_I_IFN", "Stimulated_1", 
+  CD8.seurat <- subset(seurat.combined, idents = c("Naive_like_1", "Naive_like_2", "Naive_like_3", 
+                                                   "Effector", "ISG", "Stimulated_1", 
                                                    "Stimulated_exhausted", "Exhausted_1", "Exhausted_2", "TRM", "Proliferative"))
   
   
@@ -1740,8 +1675,6 @@ rm(clonotypes,
 ```
 
 
-
-
 ### Count clonotype frequencies and normalise
 ```{r Count_and_normalise_clonotype_frequencies}
 
@@ -1923,8 +1856,6 @@ unique(CD8.seurat.tcr@meta.data$cloneType)
 ```
 
 
-
-
 ### Clonotype Overlap
 ```{r Clonotype_Overlap}
 
@@ -2007,18 +1938,6 @@ SaveH5Seurat(CD8.seurat.tcr.filt,
              overwrite = TRUE)
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -9,8 +9,8 @@ names(condition.cols) <- c("US", "Stimulated")
 clust.cols <- c("#E41A1C", # Naive_like_1_CM
                 "#A6761D", # Naive_like_2_SC
                 "#8DA0CB", # Naive_like_3
-                "#666666", # Cytotoxic
-                "#A6D854", # Type_I_IFN
+                "#666666", # GZMK
+                "#A6D854", # ISG
                 "#984EA3", # Stimulated_1
                 "#1B9E77", # Stimulated_exhausted
                 "#D95F02", # Exhausted_1
@@ -21,11 +21,11 @@ clust.cols <- c("#E41A1C", # Naive_like_1_CM
                 "#FF7F00", # MAIT 
                 "#E78AC3") # Proliferative
 
-clust.names <- c("Naive_like_1_CM",
-                 "Naive_like_2_SC",
+clust.names <- c("Naive_like_1",
+                 "Naive_like_2",
                  "Naive_like_3",
-                 "Cytotoxic",
-                 "Type_I_IFN",
+                 "GZMK",
+                 "ISG",
                  "Stimulated_1",
                  "Stimulated_exhausted",
                  "Exhausted_1",
@@ -57,3 +57,4 @@ CD8.cols <- clust.cols[!keep.logic]
 
 # remove un-necessary variables
 rm(keep.logic, clust.names)
+

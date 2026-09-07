@@ -9,7 +9,7 @@ Get.distribution <- function(clonotype.table,
   
   #browser()
   # Extract clonotype by cluster info
-  clonotype.overview <- table(clonotype.table$CTaa, clonotype.table$seurat_clusters)
+  clonotype.overview <- table(clonotype.table$CTaa, clonotype.table$Clusters_l1)
   
   # Format table
   logic.vec <- colnames(clonotype.overview) %in% query.clusters
