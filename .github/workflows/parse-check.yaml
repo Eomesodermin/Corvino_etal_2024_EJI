@@ -12,6 +12,6 @@ jobs:
         with:
           use-public-rspm: true
       - name: Install knitr
-        run: Rscript -e 'install.packages("knitr")'
+        run: Rscript --no-init-file -e 'install.packages("knitr", repos = "https://cloud.r-project.org")'
       - name: Check that every R script and notebook parses
-        run: Rscript .github/check_parse.R .
+        run: Rscript --no-init-file .github/check_parse.R .
