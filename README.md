@@ -50,6 +50,32 @@ External, publicly available datasets used for cross-validation in this study (u
 
 ---
 
+## Repository structure
+
+```
+scripts/
+├── 01_HNSCC_Dataset_Preprocessing.Rmd   # CellRanger output -> QC, integration, clustering, annotation (scRNA + scTCR)
+├── 02_Figure_1.Rmd ... 06_Figure_5.Rmd  # one notebook per main figure
+├── 07_clean_seurat_objects.Rmd          # removes unneeded metadata from the Seurat objects before GEO upload
+├── Setup.R                              # environment set-up shared by the notebooks
+└── functions/                           # helper functions (clonotype distribution, heatmap annotation, ...)
+data/                                    # signature and transcription-factor gene lists used by the notebooks
+results/                                 # figure PDFs and tables, grouped by figure (incl. supplementary and reviewer plots)
+```
+
+## Reproducing the analysis
+
+1. Obtain the single-cell data (see [Data Availability](#data-availability): the patient data are available on request; the public comparison datasets are cited in the paper).
+2. Place them where `scripts/01_HNSCC_Dataset_Preprocessing.Rmd` expects them (paths are relative to the repository root, set with `here::here()`).
+3. Knit the notebooks in numeric order. Each notebook loads its own packages in the Setup chunk, together with the helper package [`r-utility-functions`](https://github.com/Eomesodermin/r-utility-functions).
+
+
+## Citation
+
+To cite the paper, use the DOI above; to cite this code, use the Zenodo DOI in the badge at the top. Machine-readable citation metadata is in [`CITATION.cff`](CITATION.cff).
+
+---
+
 ## Code Attribution  
 
 This code and analysis were authored by **Dillon Corvino** — [github.com/Eomesodermin](https://github.com/Eomesodermin) · [dilloncorvino.com](https://dilloncorvino.com).  
