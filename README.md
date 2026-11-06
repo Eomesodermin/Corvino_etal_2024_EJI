@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/283806046.svg)](https://doi.org/10.5281/zenodo.14865716)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14865716.svg)](https://doi.org/10.5281/zenodo.14865716)
 
 # Type I interferon drives a cellular state inert to TCR-stimulation and could impede effective T-cell differentiation in cancer
 
